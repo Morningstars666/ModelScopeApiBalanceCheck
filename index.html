@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ModelScope API 余量查询</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/amis@latest/sdk/sdk.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/amis@latest/sdk/helper.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/amis@latest/sdk/iconfont.css">
+    <!-- 这是默认主题所需的，如果是其他主题则不需要 -->
+    <!-- 从 1.1.0 开始 sdk.css 将不支持 IE 11，如果要支持 IE11 请引用这个 css，并把前面那个删了 -->
+    <!-- <link rel="stylesheet" href="sdk-ie11.css" /> -->
+    <!-- 不过 amis 开发团队几乎没测试过 IE 11 下的效果，所以可能有细节功能用不了，如果发现请报 issue -->
+    <style>
+      html,
+      body,
+      .app-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="app-wrapper"></div>
+    <script src="https://cdn.jsdelivr.net/npm/amis@latest/sdk/sdk.js"></script>
+    <script type="text/javascript">
+      (function () {
+        let amis = amisRequire('amis/embed');
+        // 通过替换下面这个配置来生成不同页面
+        let amisJSON = {
+  "type": "page",
+  "title": "ModelScope API-Inference 余量查询",
+  "body": [
+    {
+      "type": "service",
+      "body": [
+        {
+          "type": "flex",
+          "items": [
+            {
+              "type": "container",
+              "body": [
+                {
+                  "type": "flex",
+                  "items": [
+                    {
+                      "type": "container",
+                      "body": [],
+                      "size": "none",
+                      "style": {
+                        "position": "static",
+                        "display": "block",
+                        "flex": "1 1 auto",
+                        "flexGrow": 1,
+                        "flexBasis": "0px"
+                      },
+                      "wrapperBody": false,
+                      "isFixedHeight": false,
+                      "isFixedWidth": false,
+                      "id": "u:6d7e61d3c347"
+                    },
+                    {
+                      "type": "container",
+                      "body": [
+                        {
+                          "type": "flex",
+                          "items": [
+                            {
+                              "type": "container",
+                              "body": [
+                                {
+                                  "type": "flex",
+                                  "items": [
+                                    {
+                                      "type": "container",
+                                      "body": [
+                                        {
+                                          "type": "input-text",
+                                          "label": "模型",
+                                          "name": "models",
+                                          "id": "u:0d14a54ff2c8",
+                                          "clearable": true
+                                        }
+                                      ],
+                                      "size": "none",
+                                      "style": {
+                                        "position": "static",
+                                        "display": "block",
+                                        "flex": "1 1 auto",
+                                        "flexGrow": 1,
+                                        "flexBasis": "0px"
+                                      },
+                                      "wrapperBody": false,
+                                      "isFixedHeight": false,
+                                      "isFixedWidth": false,
+                                      "id": "u:ac99166ea6ae"
+                                    },
+                                    {
+                                      "type": "container",
+                                      "body": [
+                                        {
+                                          "type": "input-password",
+                                          "label": "访问密钥",
+                                          "name": "api_key",
+                                          "id": "u:477907034237",
+                                          "showCounter": false,
+                                          "validations": {},
+                                          "validationErrors": {},
+                                          "clearable": true
+                                        }
+                                      ],
+                                      "size": "none",
+                                      "style": {
+                                        "position": "static",
+                                        "display": "block",
+                                        "flex": "1 1 auto",
+                                        "flexGrow": 1,
+                                        "flexBasis": "0px"
+                                      },
+                                      "wrapperBody": false,
+                                      "isFixedHeight": false,
+                                      "isFixedWidth": false,
+                                      "id": "u:25745af51f9c"
+                                    }
+                                  ],
+                                  "style": {
+                                    "position": "relative",
+                                    "rowGap": "10px",
+                                    "columnGap": "10px",
+                                    "flexWrap": "nowrap",
+                                    "inset": "auto"
+                                  },
+                                  "id": "u:3f8c58ecd254",
+                                  "isFixedHeight": false,
+                                  "isFixedWidth": false
+                                }
+                              ],
+                              "size": "none",
+                              "style": {
+                                "position": "static",
+                                "display": "block",
+                                "flex": "1 1 auto",
+                                "flexGrow": 1
+                              },
+                              "wrapperBody": false,
+                              "isFixedHeight": false,
+                              "isFixedWidth": false,
+                              "id": "u:db89f0e18d18"
+                            },
+                            {
+                              "type": "container",
+                              "body": [
+                                {
+                                  "type": "flex",
+                                  "items": [
+                                    {
+                                      "type": "container",
+                                      "body": [],
+                                      "size": "none",
+                                      "style": {
+                                        "position": "static",
+                                        "display": "block",
+                                        "flex": "1 1 auto",
+                                        "flexGrow": 1,
+                                        "flexBasis": "0px"
+                                      },
+                                      "wrapperBody": false,
+                                      "isFixedHeight": false,
+                                      "isFixedWidth": false,
+                                      "id": "u:a7322ef7efc9"
+                                    },
+                                    {
+                                      "type": "container",
+                                      "body": [],
+                                      "size": "none",
+                                      "style": {
+                                        "position": "static",
+                                        "display": "block",
+                                        "flex": "1 1 auto",
+                                        "flexGrow": 1,
+                                        "flexBasis": "0px"
+                                      },
+                                      "wrapperBody": false,
+                                      "isFixedHeight": false,
+                                      "isFixedWidth": false,
+                                      "id": "u:a73f2300f3de"
+                                    },
+                                    {
+                                      "type": "container",
+                                      "body": [
+                                        {
+                                          "type": "flex",
+                                          "items": [
+                                            {
+                                              "type": "container",
+                                              "body": [],
+                                              "size": "none",
+                                              "style": {
+                                                "position": "static",
+                                                "display": "block",
+                                                "flex": "1 1 auto",
+                                                "flexGrow": 1,
+                                                "flexBasis": 0
+                                              },
+                                              "wrapperBody": false,
+                                              "isFixedHeight": false,
+                                              "isFixedWidth": false,
+                                              "id": "u:3419cd09f523"
+                                            },
+                                            {
+                                              "type": "container",
+                                              "body": [],
+                                              "size": "none",
+                                              "style": {
+                                                "position": "static",
+                                                "display": "block",
+                                                "flex": "1 1 auto",
+                                                "flexGrow": 1,
+                                                "flexBasis": 0
+                                              },
+                                              "wrapperBody": false,
+                                              "isFixedHeight": false,
+                                              "isFixedWidth": false,
+                                              "id": "u:ef8c88337134"
+                                            },
+                                            {
+                                              "type": "container",
+                                              "body": [
+                                                {
+                                                  "type": "button",
+                                                  "label": "查询",
+                                                  "onEvent": {
+                                                    "click": {
+                                                      "actions": [
+                                                        {
+                                                          "componentId": "u:3663b64ac6a0",
+                                                          "ignoreError": false,
+                                                          "actionType": "reload",
+                                                          "dataMergeMode": "merge",
+                                                          "data": {
+                                                            "models_": "${[models]}",
+                                                            "api_key": "${api_key}"
+                                                          }
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "id": "u:591b38713e14",
+                                                  "disabledOnAction": false,
+                                                  "level": "primary",
+                                                  "confirmText": "免责条款\n1. 本网站查询模型调用余量时，将消耗一次模型调用次数。\n2. 本网站不保存任何访问密钥信息。\n3. 点击确认后，y系统才会执行查询操作。"
+                                                }
+                                              ],
+                                              "size": "none",
+                                              "style": {
+                                                "position": "static",
+                                                "display": "block",
+                                                "flex": "1 1 auto",
+                                                "flexGrow": 1,
+                                                "flexBasis": "0px"
+                                              },
+                                              "wrapperBody": false,
+                                              "isFixedHeight": false,
+                                              "isFixedWidth": false,
+                                              "id": "u:4ff182655f49"
+                                            }
+                                          ],
+                                          "style": {
+                                            "position": "relative",
+                                            "rowGap": "10px",
+                                            "columnGap": "10px"
+                                          },
+                                          "id": "u:f54e7566ff89"
+                                        }
+                                      ],
+                                      "size": "none",
+                                      "style": {
+                                        "position": "static",
+                                        "display": "block",
+                                        "flex": "1 1 auto",
+                                        "flexGrow": 1,
+                                        "flexBasis": "0px"
+                                      },
+                                      "wrapperBody": false,
+                                      "isFixedHeight": false,
+                                      "isFixedWidth": false,
+                                      "id": "u:88a0f798c808"
+                                    }
+                                  ],
+                                  "style": {
+                                    "position": "relative",
+                                    "rowGap": "10px",
+                                    "columnGap": "10px",
+                                    "flexWrap": "nowrap",
+                                    "inset": "auto"
+                                  },
+                                  "id": "u:8ccbff5f48aa",
+                                  "isFixedHeight": false,
+                                  "isFixedWidth": false
+                                }
+                              ],
+                              "size": "none",
+                              "style": {
+                                "position": "static",
+                                "display": "block",
+                                "flex": "1 1 auto",
+                                "flexGrow": 1
+                              },
+                              "wrapperBody": false,
+                              "isFixedHeight": false,
+                              "isFixedWidth": false,
+                              "id": "u:e82e85771abd"
+                            }
+                          ],
+                          "style": {
+                            "position": "relative",
+                            "rowGap": "10px",
+                            "columnGap": "10px",
+                            "flexDirection": "column",
+                            "flexWrap": "nowrap",
+                            "inset": "auto"
+                          },
+                          "id": "u:e8fc0318c111",
+                          "isFixedHeight": false,
+                          "isFixedWidth": false
+                        }
+                      ],
+                      "size": "none",
+                      "style": {
+                        "position": "static",
+                        "display": "block",
+                        "flex": "1 1 auto",
+                        "flexGrow": 2,
+                        "flexBasis": 0
+                      },
+                      "wrapperBody": false,
+                      "isFixedHeight": false,
+                      "isFixedWidth": false,
+                      "id": "u:281e9f225a1d"
+                    },
+                    {
+                      "type": "container",
+                      "body": [],
+                      "size": "none",
+                      "style": {
+                        "position": "static",
+                        "display": "block",
+                        "flex": "1 1 auto",
+                        "flexGrow": 1,
+                        "flexBasis": 0
+                      },
+                      "wrapperBody": false,
+                      "isFixedHeight": false,
+                      "isFixedWidth": false,
+                      "id": "u:95e096af2a04"
+                    }
+                  ],
+                  "style": {
+                    "position": "relative",
+                    "rowGap": "10px",
+                    "columnGap": "10px",
+                    "flexWrap": "nowrap",
+                    "inset": "auto"
+                  },
+                  "id": "u:b5db041d3f32",
+                  "isFixedHeight": false,
+                  "isFixedWidth": false
+                }
+              ],
+              "size": "none",
+              "style": {
+                "position": "static",
+                "display": "block",
+                "flex": "1 1 auto",
+                "flexGrow": 1
+              },
+              "wrapperBody": false,
+              "isFixedHeight": false,
+              "isFixedWidth": false,
+              "id": "u:b4f027b836ee"
+            },
+            {
+              "type": "container",
+              "body": [
+                {
+                  "type": "table",
+                  "columns": [
+                    {
+                      "label": "模型名称",
+                      "name": "${model}",
+                      "type": "text",
+                      "id": "u:1e474f14d46e",
+                      "placeholder": "-"
+                    },
+                    {
+                      "type": "text",
+                      "name": "${request_limit}",
+                      "label": "用户当天限额",
+                      "id": "u:c9c9bab9f17a",
+                      "placeholder": "-"
+                    },
+                    {
+                      "type": "text",
+                      "label": "用户当天剩余额度",
+                      "name": "${request_remaining}",
+                      "id": "u:1118aa0f90de",
+                      "placeholder": "-"
+                    },
+                    {
+                      "type": "text",
+                      "label": "模型当天限额",
+                      "name": "${model_request_limit}",
+                      "id": "u:dbbc1f10401a"
+                    },
+                    {
+                      "type": "text",
+                      "name": "${model_request_remaining}",
+                      "label": "模型当天剩余额度",
+                      "id": "u:0104052d37e8",
+                      "placeholder": "-"
+                    }
+                  ],
+                  "id": "u:9bc57a9098d5"
+                }
+              ],
+              "size": "none",
+              "style": {
+                "position": "static",
+                "display": "block",
+                "flex": "1 1 auto",
+                "flexGrow": 1
+              },
+              "wrapperBody": false,
+              "isFixedHeight": false,
+              "isFixedWidth": false,
+              "id": "u:ae48b13d7c7a"
+            },
+            {
+              "type": "container",
+              "body": [],
+              "size": "none",
+              "style": {
+                "position": "static",
+                "display": "block",
+                "flex": "1 1 auto",
+                "flexGrow": 1
+              },
+              "wrapperBody": false,
+              "isFixedHeight": false,
+              "isFixedWidth": false,
+              "id": "u:8a2fc820afc9"
+            }
+          ],
+          "style": {
+            "position": "relative",
+            "rowGap": "10px",
+            "columnGap": "10px",
+            "flexDirection": "column"
+          },
+          "id": "u:e962ece70711",
+          "isFixedHeight": false,
+          "isFixedWidth": false
+        }
+      ],
+      "id": "u:3663b64ac6a0",
+      "dsType": "api",
+      "api": {
+        "url": "/api/balance",
+        "method": "post",
+        "requestAdaptor": "",
+        "adaptor": "",
+        "messages": {}
+      },
+      "data": {
+        "model": "",
+        "request_limit": "",
+        "request_remaining": "",
+        "model_request_limit": "",
+        "model_request_remaining": ""
+      },
+      "initFetch": false
+    }
+  ],
+  "id": "u:c51827a2db2d",
+  "asideResizor": false,
+  "pullRefresh": {
+    "disabled": true
+  },
+  "regions": [
+    "body",
+    "header"
+  ],
+  "onEvent": {
+    "init": {
+      "weight": 0,
+      "actions": [
+        {
+          "ignoreError": false,
+          "actionType": "dialog",
+          "dialog": {
+            "type": "dialog",
+            "title": "免责条款",
+            "body": [
+              {
+                "type": "tpl",
+                "tpl": "<h2>1. 本网站查询模型调用余量时，将消耗一次模型调用次数。</h2>\n<h2>2. 本网站前后端不保存任何访问密钥信息。</h2>",
+                "id": "u:5040a0ba7dfa"
+              }
+            ],
+            "id": "u:70317c25bafd",
+            "actions": [
+              {
+                "type": "button",
+                "actionType": "cancel",
+                "label": "取消",
+                "id": "u:09a173df6f91"
+              },
+              {
+                "type": "button",
+                "actionType": "confirm",
+                "label": "确定",
+                "primary": true,
+                "id": "u:07fb30d90f95",
+                "disabledOnAction": false
+              }
+            ],
+            "showCloseButton": true,
+            "closeOnOutside": false,
+            "closeOnEsc": false,
+            "showErrorMsg": true,
+            "showLoading": true,
+            "draggable": false,
+            "themeCss": {
+              "dialogTitleClassName": {
+                "font": {
+                  "fontSize": "var(--fonts-size-3)"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "definitions": {}
+}
+        let amisScoped = amis.embed('#root', amisJSON);
+      })();
+    </script>
+  </body>
+</html>
