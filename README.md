@@ -2,6 +2,8 @@
 
 这是一个基于FastAPI的ModelScope模型调用余量查询服务，支持异步请求和Web界面。
 
+可使用以下链接直接使用项目：[ModelScope API 余量查询](https://checkapi.qciy.site/)
+
 ## 功能特性
 
 - ✅ 使用FastAPI框架构建
