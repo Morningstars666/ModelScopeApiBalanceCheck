@@ -19,22 +19,41 @@
 ```
 检查ModelScope余额/
 ├── main.py              # FastAPI主应用
-├── requirements.txt     # 项目依赖
+├── pyproject.toml       # 项目依赖配置 (uv)
+├── uv.lock              # 依赖锁文件
+├── requirements.txt     # 旧版依赖文件（保留用于参考）
 └── README.md           # 项目说明
 ```
 
 ## 快速开始
 
-### 1. 安装依赖
+### 1. 安装依赖 (使用 uv)
+
+本项目已迁移至 [uv](https://github.com/astral-sh/uv) 包管理器，推荐使用以下命令：
 
 ```bash
-pip install -r requirements.txt
+# 同步安装所有依赖（包括开发依赖）
+uv sync
+
+# 仅安装生产依赖
+uv sync --no-dev
+
+# 或使用 pip 安装（如果需要）
+uv pip install -r requirements.txt
 ```
 
 ### 2. 运行服务
 
+使用以下命令启动服务：
+
 ```bash
-python main.py
+uv run python main.py
+```
+
+或直接使用 uvicorn：
+
+```bash
+uv run uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
 服务将在 `http://localhost:8000` 启动。
@@ -113,6 +132,7 @@ python main.py
 - **httpx**: 异步HTTP客户端
 - **amis**: 百度开源的前端低代码框架
 - **Pydantic**: 数据验证和设置管理
+- **uv**: 极速Python包管理器和解析器
 
 ## 核心功能
 
@@ -142,10 +162,11 @@ python main.py
 
 ### 依赖版本
 
-- `fastapi>=0.104.1`: Web框架
-- `uvicorn[standard]>=0.24.0`: ASGI服务器
-- `httpx>=0.25.0`: 异步HTTP客户端
-- `pydantic>=2.5.0`: 数据验证
+- `fastapi>=0.128.7`: Web框架
+- `uvicorn>=0.40.0`: ASGI服务器
+- `httpx>=0.28.1`: 异步HTTP客户端
+
+依赖版本在 `pyproject.toml` 中管理。
 
 ### 超时设置
 
@@ -216,7 +237,13 @@ query_multiple_models()
 使用uvicorn开发模式运行：
 
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+或使用部署脚本：
+
+```bash
+bash deploy.sh
 ```
 
 ### 生产部署
@@ -224,8 +251,8 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 使用gunicorn + uvicorn workers：
 
 ```bash
-pip install gunicorn
-gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+uv pip install gunicorn
+uv run gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 ```
 
 ### Docker部署
@@ -237,14 +264,17 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# 安装 uv
+RUN pip install uv
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --no-dev --frozen
 
 COPY main.py .
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 构建和运行：
@@ -254,9 +284,35 @@ docker build -t modelscope-balance-query .
 docker run -p 8000:8000 modelscope-balance-query
 ```
 
+## 关于 uv
+
+[uv](https://github.com/astral-sh/uv) 是一个极快的 Python 包管理器和解析器，相比传统的 pip：
+
+- 🚀 **极速安装**: 使用 Rust 编写，并行操作，速度显著提升
+- 📦 **现代化的依赖解析**: 基于 `pyproject.toml` 标准
+- 🔒 **锁文件支持**: `uv.lock` 确保依赖版本一致性
+- 🎯 **完美兼容**: 完全兼容 pip 和 requirements.txt
+
+常用命令：
+
+```bash
+# 添加新依赖
+uv add fastapi
+
+# 更新依赖
+uv sync
+
+# 升级所有依赖到最新版本
+uv pip compile -U pyproject.toml -o uv.lock
+
+# 查看已安装的包
+uv pip list
+```
+
 ## 许可证
 
 本项目仅供学习和参考使用。
 
 ## 免责声明
+
 README.md文档由AI生成，请自行verify。
