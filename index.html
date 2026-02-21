@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ModelScope API 余量查询</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <style>
+      :root {
+        --primary: #4f46e5;
+        --primary-hover: #4338ca;
+        --bg: #f8fafc;
+        --surface: rgba(255, 255, 255, 0.85);
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --radius-lg: 16px;
+        --radius-md: 12px;
+        --radius-sm: 8px;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      }
+      
+      * {
+        box-sizing: border-box;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        color: var(--text-main);
+        background-color: var(--bg);
+        background-image: 
+          radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.06) 0px, transparent 50%),
+          radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.06) 0px, transparent 50%);
+        background-attachment: fixed;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .page {
+        min-height: 100vh;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 24px 60px;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+
+      .header {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+      }
+
+      .header h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0;
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .header span {
+        font-size: 14px;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      /* -------------------------------------
+         优化后的 Github Corner 样式
+      ---------------------------------------- */
+      .github-corner {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 50;
+        color: #fff;
+      }
+
+      .github-corner svg {
+        fill: #1e293b;
+        color: #fff;
+        display: block;
+        transition: fill 0.3s ease;
+        filter: drop-shadow(-2px 2px 5px rgba(0, 0, 0, 0.15));
+      }
+
+      .github-corner:hover svg {
+        fill: var(--primary); /* 悬浮时渐变为主题色 */
+      }
+
+      .github-corner .octo-arm {
+        transform-origin: 130px 106px;
+      }
+
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+
+      @keyframes octocat-wave {
+        0%, 100% {
+          transform: rotate(0);
+        }
+        20%, 60% {
+          transform: rotate(-25deg);
+        }
+        40%, 80% {
+          transform: rotate(10deg);
+        }
+      }
+
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+      /* ------------------------------------- */
+
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .card {
+        background: var(--surface);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: var(--shadow-md);
+        transition: box-shadow 0.3s ease;
+      }
+
+      .card:hover {
+        box-shadow: var(--shadow-hover);
+      }
+
+      .form {
+        display: grid;
+        grid-template-columns: 2fr 1.5fr auto;
+        gap: 20px;
+        align-items: start;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .field label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+      }
+
+      .field input {
+        padding: 11px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        font-size: 14px;
+        color: var(--text-main);
+        background: #fff;
+        outline: none;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .field input::placeholder {
+        color: #94a3b8;
+      }
+
+      .field input:hover {
+        border-color: #cbd5e1;
+      }
+
+      .field input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+      }
+
+      .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 26px; /* 对齐有label的输入框 */
+      }
+
+      button {
+        font-family: inherit;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      button.primary {
+        border: none;
+        background: var(--primary);
+        color: #fff;
+        padding: 11px 24px;
+        font-size: 14px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+      }
+
+      button.primary:hover:not(:disabled) {
+        background: var(--primary-hover);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        transform: translateY(-1px);
+      }
+
+      button.primary:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      button.primary:disabled {
+        background: #a5b4fc;
+        cursor: not-allowed;
+      }
+
+      .ghost {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 13px;
+      }
+
+      .ghost:hover {
+        background: #f1f5f9;
+        color: var(--text-main);
+      }
+
+      .hint {
+        font-size: 12px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status {
+        margin-top: 24px;
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+      }
+
+      .status.hidden {
+        display: none;
+      }
+
+      .status.success {
+        background: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+      }
+
+      .status.error {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+
+      .status.loading {
+        background: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+      }
+
+      .table-container {
+        margin-top: 24px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: #fff;
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+
+      th, td {
+        padding: 14px 16px;
+        text-align: left;
+        font-size: 14px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      th {
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      tbody tr {
+        transition: background-color 0.2s;
+      }
+
+      tbody tr:hover {
+        background-color: #f8fafc;
+      }
+
+      .error-list {
+        margin-top: 16px;
+        padding: 16px;
+        background: #fef2f2;
+        border: 1px dashed #fca5a5;
+        border-radius: var(--radius-sm);
+        color: #991b1b;
+        font-size: 13px;
+        list-style: inside;
+      }
+
+      /* 历史记录时间轴化 */
+      .history-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .history-header h2 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .history-list {
+        list-style: none;
+        padding: 0 0 0 16px;
+        margin: 0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .history-list::before {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 8px;
+        bottom: 8px;
+        width: 2px;
+        background: var(--border);
+      }
+
+      .history-item {
+        position: relative;
+        padding: 4px 12px 16px 16px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        transition: all 0.2s;
+        border-radius: var(--radius-sm);
+      }
+
+      .history-item::before {
+        content: '';
+        position: absolute;
+        left: -18px;
+        top: 10px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--bg);
+        border: 2px solid #cbd5e1;
+        z-index: 1;
+        transition: all 0.2s;
+      }
+
+      .history-item:hover {
+        background: rgba(241, 245, 249, 0.6);
+      }
+
+      .history-item:hover::before {
+        border-color: var(--primary);
+        background: var(--primary);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+      }
+
+      .history-item .meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .history-item strong {
+        font-size: 14px;
+        color: var(--text-main);
+        word-break: break-all;
+      }
+
+      .history-item span {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .history-detail {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 4px;
+      }
+
+      .history-detail-item {
+        font-size: 12px;
+        color: #475569;
+        background: #fff;
+        border-radius: 6px;
+        padding: 8px 10px;
+        border: 1px solid var(--border);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      }
+
+      .history-detail-item.error {
+        color: #991b1b;
+        border-color: #fecaca;
+        background: #fef2f2;
+      }
+
+      /* 平滑过渡弹窗 */
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        z-index: 99;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .modal.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal-card {
+        background: #fff;
+        border-radius: var(--radius-md);
+        padding: 28px;
+        width: min(440px, 100%);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        transform: translateY(20px) scale(0.95);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .modal.show .modal-card {
+        transform: translateY(0) scale(1);
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .modal-icon {
+        width: 40px;
+        height: 40px;
+        background: #e0e7ff;
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-header h3 {
+        margin: 0;
+        font-size: 18px;
+        color: var(--text-main);
+      }
+
+      .modal-body {
+        color: var(--text-muted);
+        font-size: 14px;
+        line-height: 1.6;
+        background: #f8fafc;
+        padding: 16px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+      }
+
+      .modal-body ul {
+        margin: 8px 0 0 0;
+        padding-left: 20px;
+      }
+
+      .modal-body li {
+        margin-bottom: 6px;
+      }
+
+      .modal-body strong {
+        color: #334155;
+      }
+
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 4px;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* 响应式调整 */
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .form {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .actions {
+          margin-top: 8px;
+        }
+        .actions button {
+          width: 100%;
+        }
+        .page {
+          padding: 24px 16px 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- 完整的 GitHub Corner 图形 -->
+      <a class="github-corner" href="https://github.com/Morningstars666/ModelScopeApiBalanceCheck" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+        <svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true">
+          <path d="M0,0 L250,250 L250,0 Z"></path>
+          <path class="octo-arm" fill="currentColor" d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"></path>
+          <path class="octo-body" fill="currentColor" d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"></path>
+        </svg>
+      </a>
+
+      <div class="header">
+        <h1>ModelScope API 余量查询</h1>
+      </div>
+
+      <div class="layout">
+        <div class="card">
+          <form id="queryForm" class="form">
+            <div class="field">
+              <label for="modelsInput">查询模型</label>
+              <input id="modelsInput" name="models" type="text" placeholder="支持逗号或空格分隔多个模型" autocomplete="on" spellcheck="false" />
+            </div>
+            <div class="field">
+              <label for="apiKeyInput">访问密钥 (API Key)</label>
+              <input id="apiKeyInput" name="api_key" type="password" placeholder="请输入您的 API Key" autocomplete="off" />
+            </div>
+            <div class="actions">
+              <button id="submitBtn" class="primary" type="submit">立即查询</button>
+              <div class="hint">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                查询将消耗 1 次额度
+              </div>
+            </div>
+          </form>
+
+          <div id="status" class="status hidden"></div>
+          
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>模型名称</th>
+                  <th>用户限额</th>
+                  <th>用户剩余</th>
+                  <th>模型限额</th>
+                  <th>模型剩余</th>
+                </tr>
+              </thead>
+              <tbody id="resultBody">
+                <!-- 初始渲染空状态 -->
+              </tbody>
+            </table>
+          </div>
+          
+          <ul id="errorList" class="error-list hidden"></ul>
+        </div>
+
+        <div class="card">
+          <div class="history-header">
+            <h2>查询足迹</h2>
+            <button id="clearHistory" class="ghost" type="button">清空</button>
+          </div>
+          <ul id="historyList" class="history-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 精美的自定义异步免责弹窗 -->
+    <div id="disclaimerModal" class="modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <h3>操作确认</h3>
+        </div>
+        <div class="modal-body">
+          继续操作前，请您知悉以下信息：
+          <ul>
+            <li>通过本工具查询时，将<strong>消耗1次</strong>模型调用次数。</li>
+            <li>本页面前后端均<strong>不保存</strong>您的访问密钥。</li>
+            <li>点击下方确认，意味着您已阅读并同意以上条款，系统会开始执行查询请求。</li>
+          </ul>
+        </div>
+        <div class="modal-actions">
+          <button id="disclaimerCancel" class="ghost" type="button">取消</button>
+          <button id="disclaimerConfirm" class="primary" type="button">已知悉，确认查询</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const historyKey = "ms_balance_history";
+      const maxHistory = 10;
+      const form = document.getElementById("queryForm");
+      const modelsInput = document.getElementById("modelsInput");
+      const apiKeyInput = document.getElementById("apiKeyInput");
+      const statusEl = document.getElementById("status");
+      const resultBody = document.getElementById("resultBody");
+      const errorList = document.getElementById("errorList");
+      const historyList = document.getElementById("historyList");
+      const clearHistoryBtn = document.getElementById("clearHistory");
+      const submitBtn = document.getElementById("submitBtn");
+      const disclaimerModal = document.getElementById("disclaimerModal");
+      const disclaimerCancel = document.getElementById("disclaimerCancel");
+      const disclaimerConfirm = document.getElementById("disclaimerConfirm");
+
+      // 异步优美弹窗
+      const showConfirmModal = () => {
+        return new Promise((resolve) => {
+          disclaimerModal.classList.remove("hidden");
+          // 强制重绘以触发过渡动画
+          void disclaimerModal.offsetWidth;
+          disclaimerModal.classList.add("show");
+
+          const cleanup = (result) => {
+            disclaimerModal.classList.remove("show");
+            setTimeout(() => {
+              disclaimerModal.classList.add("hidden");
+              resolve(result);
+            }, 300);
+            disclaimerConfirm.removeEventListener("click", onConfirm);
+            disclaimerCancel.removeEventListener("click", onCancel);
+          };
+
+          const onConfirm = () => cleanup(true);
+          const onCancel = () => cleanup(false);
+
+          disclaimerConfirm.addEventListener("click", onConfirm);
+          disclaimerCancel.addEventListener("click", onCancel);
+        });
+      };
+
+      const loadHistory = () => {
+        try {
+          const raw = localStorage.getItem(historyKey);
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      };
+
+      const saveHistory = (items) => {
+        localStorage.setItem(historyKey, JSON.stringify(items));
+      };
+
+      const renderHistory = () => {
+        const items = loadHistory();
+        historyList.innerHTML = "";
+        
+        if (items.length === 0) {
+          historyList.innerHTML = `
+            <li style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px 0; border: none; background: transparent;">
+              这里空空如也<br><span style="font-size: 12px; opacity: 0.7;">查询后自动生成记录</span>
+            </li>
+          `;
+          return;
+        }
+        
+        items.forEach((item) => {
+          const li = document.createElement("li");
+          li.className = "history-item";
+          
+          const detail = Array.isArray(item.data)
+            ? item.data.map((record) => {
+                  if (record && record.error) {
+                    return `<div class="history-detail-item error">${record.model || "未知"}：${record.error}</div>`;
+                  }
+                  const uRemain = record.request_remaining ?? "-";
+                  const uLimit = record.request_limit ?? "-";
+                  const mRemain = record.model_request_remaining ?? "-";
+                  const mLimit = record.model_request_limit ?? "-";
+                  return `<div class="history-detail-item"><strong>${record.model || "-"}</strong> · 用户余量 ${uRemain}/${uLimit} · 模型余量 ${mRemain}/${mLimit}</div>`;
+                }).join("")
+            : "";
+            
+          const detailHtml = detail ? `<div class="history-detail">${detail}</div>` : "";
+          
+          li.innerHTML = `
+            <div class="meta">
+              <strong>${item.models}</strong>
+              <span>${item.time}</span>
+            </div>
+            ${detailHtml}
+          `;
+          
+          li.addEventListener("click", () => {
+            modelsInput.value = item.models;
+            modelsInput.focus();
+            if (Array.isArray(item.data)) {
+              renderResults(item.data);
+              renderErrors(item.data);
+              setStatus("已从时间轴加载历史记录", "success");
+            }
+          });
+          
+          historyList.appendChild(li);
+        });
+      };
+
+      const addHistory = (modelsValue, data) => {
+        const items = loadHistory();
+        const entry = {
+          models: modelsValue,
+          time: new Date().toLocaleTimeString('zh-CN', { hour12: false }),
+          data: Array.isArray(data) ? data : [],
+        };
+        const filtered = items.filter((item) => item.models !== modelsValue);
+        filtered.unshift(entry);
+        saveHistory(filtered.slice(0, maxHistory));
+        renderHistory();
+      };
+
+      const setStatus = (text, type) => {
+        if (!text) {
+          statusEl.className = "status hidden";
+          statusEl.innerHTML = "";
+          return;
+        }
+        statusEl.className = `status ${type}`;
+        
+        const icons = {
+          loading: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>`,
+          success: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+          error: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`
+        };
+        statusEl.innerHTML = `${icons[type] || ''} <span>${text}</span>`;
+        
+        if(type === 'loading') {
+          statusEl.querySelector('svg').style.animation = 'spin 1s linear infinite';
+        }
+      };
+
+      const setLoading = (loading) => {
+        submitBtn.disabled = loading;
+        submitBtn.textContent = loading ? "正在请求节点..." : "立即查询";
+      };
+
+      const parseModels = (value) => {
+        return value.split(/[\s,，]+/).map((item) => item.trim()).filter(Boolean);
+      };
+
+      const formatNumber = (val) => {
+        if (val === null || val === undefined || val === "") return "-";
+        return Number(val).toLocaleString('en-US'); 
+      };
+
+      const renderEmptyState = () => {
+        resultBody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 48px 0; color: #94a3b8; border-bottom: none;">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 8px; opacity: 0.5;">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line>
+              </svg>
+              <div style="font-size: 14px;">等待查询结果...</div>
+            </td>
+          </tr>
+        `;
+      };
+
+      const renderResults = (items) => {
+        resultBody.innerHTML = "";
+        if (!items || items.length === 0) {
+          renderEmptyState();
+          return;
+        }
+        items.forEach((item) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td style="font-weight: 500; color: var(--primary);">${item.model || "-"}</td>
+            <td>${formatNumber(item.request_limit)}</td>
+            <td>${formatNumber(item.request_remaining)}</td>
+            <td>${formatNumber(item.model_request_limit)}</td>
+            <td>${formatNumber(item.model_request_remaining)}</td>
+          `;
+          resultBody.appendChild(row);
+        });
+      };
+
+      const renderErrors = (items) => {
+        const errors = (items || []).filter((item) => item && item.error);
+        if (errors.length === 0) {
+          errorList.innerHTML = "";
+          errorList.classList.add("hidden");
+          return;
+        }
+        errorList.innerHTML = errors.map((item) => `<li><strong>${item.model || "未知"}</strong>：${item.error}</li>`).join("");
+        errorList.classList.remove("hidden");
+      };
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        
+        const modelsValue = modelsInput.value.trim();
+        const apiKeyValue = apiKeyInput.value.trim();
+        
+        if (!modelsValue || !apiKeyValue) {
+          setStatus("模型名称或 API Key 不能为空", "error");
+          return;
+        }
+        
+        const models = parseModels(modelsValue);
+        if (models.length === 0) {
+          setStatus("解析不到有效的模型名称", "error");
+          return;
+        }
+
+        const confirmed = await showConfirmModal();
+        if (!confirmed) return;
+
+        setLoading(true);
+        setStatus("正在连接 ModelScope API...", "loading");
+        
+        try {
+          const response = await fetch("/api/balance", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ models, api_key: apiKeyValue }),
+          });
+          
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data && data.message ? data.message : "请求服务端失败");
+          }
+          
+          renderResults(data.data);
+          renderErrors(data.data);
+          setStatus(data.message || "额度查询成功", data.success ? "success" : "error");
+          addHistory(modelsValue, data.data);
+          
+        } catch (error) {
+          renderResults([]);
+          renderErrors([]);
+          setStatus(error.message || "请求异常中断", "error");
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      clearHistoryBtn.addEventListener("click", () => {
+        saveHistory([]);
+        renderHistory();
+        setStatus("历史记录已清空", "success");
+        setTimeout(() => setStatus("", ""), 3000);
+      });
+
+      // 初始化
+      document.head.insertAdjacentHTML('beforeend', '<style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>');
+      renderEmptyState();
+      renderHistory();
+    </script>
+  </body>
+</html>
